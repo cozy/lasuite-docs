@@ -13,6 +13,9 @@ env:
 jobs:
   build-and-push-backend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       -
         name: Checkout repository
@@ -36,6 +39,9 @@ jobs:
 
   build-and-push-frontend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       -
         name: Checkout repository
