@@ -32,7 +32,7 @@ jobs:
           target: backend-production
           build-args: DOCKER_USER=${{ env.DOCKER_USER }}:-1000
           push: true
-          tags: cozy/impress-backend:{{ github.event.inputs.message }}
+          tags: cozy/impress-backend:${{ github.event.inputs.tag }}
 
   build-and-push-frontend:
     runs-on: ubuntu-latest
@@ -58,4 +58,4 @@ jobs:
             DOCKER_USER=${{ env.DOCKER_USER }}:-1000
             PUBLISH_AS_MIT=false
           push: true
-          tags: cozy/impress-frontend:{{ github.event.inputs.message }}
+          tags: cozy/impress-frontend:${{ github.event.inputs.tag }}
