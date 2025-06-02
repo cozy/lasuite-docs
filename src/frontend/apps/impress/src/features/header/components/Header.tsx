@@ -14,10 +14,18 @@ import { ButtonTogglePanel } from './ButtonTogglePanel';
 import { LaGaufre } from './LaGaufre';
 import { Title } from './Title';
 
-export const Header = () => {
+interface HeaderProps {
+  hasContent: boolean;
+}
+
+export const Header = ({ hasContent }: HeaderProps) => {
   const { t } = useTranslation();
   const { spacingsTokens, colorsTokens } = useCunninghamTheme();
   const { isDesktop } = useResponsiveStore();
+
+  if (!hasContent) {
+    return null;
+  }
 
   return (
     <Box

@@ -20,13 +20,14 @@ export function MainLayout({
   const { isDesktop } = useResponsiveStore();
   const { colorsTokens } = useCunninghamTheme();
   const currentBackgroundColor = !isDesktop ? 'white' : backgroundColor;
+  const hasContent = !window._cozyBridge;
 
   return (
     <Box className="--docs--main-layout">
-      <Header />
+      <Header hasContent={hasContent} />
       <Box
         $direction="row"
-        $margin={{ top: `${HEADER_HEIGHT}px` }}
+        $margin={{ top: `${hasContent ? HEADER_HEIGHT : 0}px` }}
         $width="100%"
       >
         <LeftPanel />
@@ -36,7 +37,7 @@ export function MainLayout({
           $align="center"
           $flex={1}
           $width="100%"
-          $height={`calc(100dvh - ${HEADER_HEIGHT}px)`}
+          $height={`calc(100dvh - ${hasContent ? HEADER_HEIGHT : 0}px)`}
           $padding={{
             all: isDesktop ? 'base' : '0',
           }}
