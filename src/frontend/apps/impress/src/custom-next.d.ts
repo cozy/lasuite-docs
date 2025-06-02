@@ -13,7 +13,13 @@ declare module '*.svg' {
 }
 
 declare module '*.svg?url' {
-  const content: string;
+  const content: {
+    src: string;
+    width: number;
+    height: number;
+    blurWidth: number;
+    blurHeight: number;
+  };
   export default content;
 }
 

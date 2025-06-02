@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useConfig } from '@/core';
 import { useIsOffline } from '@/features/service-worker';
 
 import { useProviderStore } from '../stores';
@@ -7,6 +8,7 @@ import { Doc, LinkReach } from '../types';
 
 export const useIsCollaborativeEditable = (doc: Doc) => {
   const { isConnected } = useProviderStore();
+  const { data: conf } = useConfig();
 
   const docIsPublic = doc.link_reach === LinkReach.PUBLIC;
   const docIsAuth = doc.link_reach === LinkReach.AUTHENTICATED;
@@ -36,6 +38,13 @@ export const useIsCollaborativeEditable = (doc: Doc) => {
 
     return () => clearTimeout(timer);
   }, [isConnected, isOffline, isShared]);
+
+  if (!conf?.COLLABORATION_WS_NOT_CONNECTED_READY_ONLY) {
+    return {
+      isEditable: true,
+      isLoading: false,
+    };
+  }
 
   return {
     isEditable,

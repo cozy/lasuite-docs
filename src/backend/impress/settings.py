@@ -413,6 +413,11 @@ class Base(Configuration):
     COLLABORATION_WS_URL = values.Value(
         None, environ_name="COLLABORATION_WS_URL", environ_prefix=None
     )
+    COLLABORATION_WS_NOT_CONNECTED_READY_ONLY = values.BooleanValue(
+        False,
+        environ_name="COLLABORATION_WS_NOT_CONNECTED_READY_ONLY",
+        environ_prefix=None,
+    )
 
     # Frontend
     FRONTEND_THEME = values.Value(
@@ -675,6 +680,15 @@ class Base(Configuration):
                 "level": values.Value(
                     "INFO",
                     environ_name="LOGGING_LEVEL_LOGGERS_APP",
+                    environ_prefix=None,
+                ),
+                "propagate": False,
+            },
+            "docs.security": {
+                "handlers": ["console"],
+                "level": values.Value(
+                    "INFO",
+                    environ_name="LOGGING_LEVEL_LOGGERS_SECURITY",
                     environ_prefix=None,
                 ),
                 "propagate": False,

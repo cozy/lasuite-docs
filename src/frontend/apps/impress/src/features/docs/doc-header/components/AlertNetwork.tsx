@@ -29,7 +29,7 @@ export const AlertNetwork = () => {
             border: 1px solid var(--c--theme--colors--warning-300);
           `}
         >
-          <Box $direction="row" $gap={spacingsTokens['2xs']}>
+          <Box $direction="row" $gap={spacingsTokens['2xs']} $align="center">
             <Icon iconName="mobiledata_off" $theme="warning" $variation="600" />
             <Text $theme="warning" $variation="600" $weight={500}>
               {t('Your network do not allow you to edit')}

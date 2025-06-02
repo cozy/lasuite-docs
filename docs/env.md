@@ -47,6 +47,7 @@ These are the environment variables you can set for the `impress-backend` contai
 | COLLABORATION_API_URL                           | collaboration api host                                                                        |                                                         |
 | COLLABORATION_SERVER_SECRET                     | collaboration api secret                                                                      |                                                         |
 | COLLABORATION_WS_URL                            | collaboration websocket url                                                                   |                                                         |
+| COLLABORATION_WS_NOT_CONNECTED_READY_ONLY           | Users not connected to the collaboration server cannot edit                                   | false                                                   |
 | FRONTEND_CSS_URL                                | To add a external css file to the app                                                         |                                                         |
 | FRONTEND_HOMEPAGE_FEATURE_ENABLED               | frontend feature flag to display the homepage                                                 | false                                                   |
 | FRONTEND_THEME                                  | frontend theme to use                                                                         |                                                         |

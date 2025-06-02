@@ -20,6 +20,7 @@ pytestmark = pytest.mark.django_db
 @override_settings(
     AI_FEATURE_ENABLED=False,
     COLLABORATION_WS_URL="http://testcollab/",
+    COLLABORATION_WS_NOT_CONNECTED_READY_ONLY=True,
     CRISP_WEBSITE_ID="123",
     FRONTEND_CSS_URL="http://testcss/",
     FRONTEND_THEME="test-theme",
@@ -41,6 +42,7 @@ def test_api_config(is_authenticated):
     assert response.status_code == HTTP_200_OK
     assert response.json() == {
         "COLLABORATION_WS_URL": "http://testcollab/",
+        "COLLABORATION_WS_NOT_CONNECTED_READY_ONLY": True,
         "CRISP_WEBSITE_ID": "123",
         "ENVIRONMENT": "test",
         "FRONTEND_CSS_URL": "http://testcss/",

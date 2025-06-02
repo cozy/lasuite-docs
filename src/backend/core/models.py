@@ -835,6 +835,7 @@ class Document(MP_Node, BaseModel):
             "ai_transform": ai_access,
             "ai_translate": ai_access,
             "attachment_upload": can_update,
+            "media_check": can_get,
             "children_list": can_get,
             "children_create": can_update and user.is_authenticated,
             "collaboration_auth": can_get,

@@ -12,30 +12,32 @@ type ComponentTokens = Tokens['components'];
 export type Theme = keyof typeof tokens.themes;
 
 interface ThemeStore {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  themeTokens: Partial<Tokens['theme']>;
   colorsTokens: Partial<ColorsTokens>;
-  fontSizesTokens: Partial<FontSizesTokens>;
-  spacingsTokens: Partial<SpacingsTokens>;
   componentTokens: ComponentTokens;
+  currentTokens: Partial<Tokens>;
+  fontSizesTokens: Partial<FontSizesTokens>;
+  setTheme: (theme: Theme) => void;
+  spacingsTokens: Partial<SpacingsTokens>;
+  theme: Theme;
+  themeTokens: Partial<Tokens['theme']>;
 }
 
 const getMergedTokens = (theme: Theme) => {
   return merge({}, tokens.themes['default'], tokens.themes[theme]);
 };
 
-const DEFAULT_THEME: Theme = 'default';
+const DEFAULT_THEME: Theme = 'generic';
 const defaultTokens = getMergedTokens(DEFAULT_THEME);
 
 const initialState: ThemeStore = {
-  theme: DEFAULT_THEME,
-  setTheme: () => {},
-  themeTokens: defaultTokens.theme,
   colorsTokens: defaultTokens.theme.colors,
   componentTokens: defaultTokens.components,
-  spacingsTokens: defaultTokens.theme.spacings,
+  currentTokens: tokens.themes[DEFAULT_THEME] as Partial<Tokens>,
   fontSizesTokens: defaultTokens.theme.font.sizes,
+  setTheme: () => {},
+  spacingsTokens: defaultTokens.theme.spacings,
+  theme: DEFAULT_THEME,
+  themeTokens: defaultTokens.theme,
 };
 
 export const useCunninghamTheme = create<ThemeStore>((set) => ({
@@ -44,12 +46,13 @@ export const useCunninghamTheme = create<ThemeStore>((set) => ({
     const newTokens = getMergedTokens(theme);
 
     set({
-      theme,
-      themeTokens: newTokens.theme,
       colorsTokens: newTokens.theme.colors,
       componentTokens: newTokens.components,
-      spacingsTokens: newTokens.theme.spacings,
+      currentTokens: tokens.themes[theme] as Partial<Tokens>,
       fontSizesTokens: newTokens.theme.font.sizes,
+      spacingsTokens: newTokens.theme.spacings,
+      theme,
+      themeTokens: newTokens.theme,
     });
   },
 }));

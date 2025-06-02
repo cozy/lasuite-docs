@@ -425,6 +425,10 @@ test.describe('Doc Editor', () => {
     const downloadPromise = page.waitForEvent('download', (download) => {
       return download.suggestedFilename().includes(`html`);
     });
+    const responseCheckPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('media-check') && response.status() === 200,
+    );
 
     await verifyDocName(page, randomDoc);
 
@@ -438,6 +442,8 @@ test.describe('Doc Editor', () => {
 
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(path.join(__dirname, 'assets/test.html'));
+
+    await responseCheckPromise;
 
     await page.locator('.bn-block-content[data-name="test.html"]').click();
     await page.getByRole('button', { name: 'Download file' }).click();
@@ -455,6 +461,51 @@ test.describe('Doc Editor', () => {
     expect(svgBuffer.toString()).toContain('Hello svg');
   });
 
+  test('it analyzes uploads', async ({ page, browserName }) => {
+    const [randomDoc] = await createDoc(page, 'doc-editor', browserName, 1);
+
+    let requestCount = 0;
+    await page.route(
+      /.*\/documents\/.*\/media-check\/\?key=.*/,
+      async (route) => {
+        const request = route.request();
+        if (request.method().includes('GET')) {
+          await route.fulfill({
+            json: {
+              status: requestCount ? 'ready' : 'processing',
+              file: '/anything.html',
+            },
+          });
+
+          requestCount++;
+        } else {
+          await route.continue();
+        }
+      },
+    );
+
+    const fileChooserPromise = page.waitForEvent('filechooser');
+
+    await verifyDocName(page, randomDoc);
+
+    const editor = page.locator('.ProseMirror.bn-editor');
+
+    await editor.click();
+    await editor.locator('.bn-block-outer').last().fill('/');
+    await page.getByText('Embedded file').click();
+    await page.getByText('Upload file').click();
+
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(path.join(__dirname, 'assets/test.html'));
+
+    await expect(editor.getByText('Analyzing file...')).toBeVisible();
+    // The retry takes a few seconds
+    await expect(editor.getByText('test.html')).toBeVisible({
+      timeout: 7000,
+    });
+    await expect(editor.getByText('Analyzing file...')).toBeHidden();
+  });
+
   test('it checks block editing when not connected to collab server', async ({
     page,
   }) => {
@@ -465,6 +516,7 @@ test.describe('Doc Editor', () => {
           json: {
             ...CONFIG,
             COLLABORATION_WS_URL: 'ws://localhost:5555/collaboration/ws/',
+            COLLABORATION_WS_NOT_CONNECTED_READY_ONLY: true,
           },
         });
       } else {

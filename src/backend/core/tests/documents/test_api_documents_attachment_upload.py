@@ -5,6 +5,7 @@ Test file uploads API endpoint for users in impress's core app.
 import re
 import uuid
 from unittest import mock
+from urllib.parse import parse_qs, urlparse
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -66,8 +67,12 @@ def test_api_documents_attachment_upload_anonymous_success():
 
     assert response.status_code == 201
 
-    pattern = re.compile(rf"^/media/{document.id!s}/attachments/(.*)\.png")
-    file_path = response.json()["file"]
+    pattern = re.compile(rf"^{document.id!s}/attachments/(.*)\.png")
+    url_parsed = urlparse(response.json()["file"])
+    assert url_parsed.path == f"/api/v1.0/documents/{document.id!s}/media-check/"
+    query = parse_qs(url_parsed.query)
+    assert query["key"][0] is not None
+    file_path = query["key"][0]
     match = pattern.search(file_path)
     file_id = match.group(1)
     # Validate that file_id is a valid UUID
@@ -148,8 +153,13 @@ def test_api_documents_attachment_upload_authenticated_success(reach, role):
 
     assert response.status_code == 201
 
-    pattern = re.compile(rf"^/media/{document.id!s}/attachments/(.*)\.png")
-    match = pattern.search(response.json()["file"])
+    pattern = re.compile(rf"^{document.id!s}/attachments/(.*)\.png")
+    url_parsed = urlparse(response.json()["file"])
+    assert url_parsed.path == f"/api/v1.0/documents/{document.id!s}/media-check/"
+    query = parse_qs(url_parsed.query)
+    assert query["key"][0] is not None
+    file_path = query["key"][0]
+    match = pattern.search(file_path)
     file_id = match.group(1)
 
     mock_analyse_file.assert_called_once_with(
@@ -224,8 +234,12 @@ def test_api_documents_attachment_upload_success(via, role, mock_user_teams):
 
     assert response.status_code == 201
 
-    file_path = response.json()["file"]
-    pattern = re.compile(rf"^/media/{document.id!s}/attachments/(.*)\.png")
+    pattern = re.compile(rf"^{document.id!s}/attachments/(.*)\.png")
+    url_parsed = urlparse(response.json()["file"])
+    assert url_parsed.path == f"/api/v1.0/documents/{document.id!s}/media-check/"
+    query = parse_qs(url_parsed.query)
+    assert query["key"][0] is not None
+    file_path = query["key"][0]
     match = pattern.search(file_path)
     file_id = match.group(1)
 
@@ -320,8 +334,13 @@ def test_api_documents_attachment_upload_fix_extension(
 
     assert response.status_code == 201
 
-    file_path = response.json()["file"]
-    pattern = re.compile(rf"^/media/{document.id!s}/attachments/(.*)\.{extension:s}")
+    pattern = re.compile(rf"^{document.id!s}/attachments/(.*)\.{extension:s}")
+    url_parsed = urlparse(response.json()["file"])
+    assert url_parsed.path == f"/api/v1.0/documents/{document.id!s}/media-check/"
+    query = parse_qs(url_parsed.query)
+    assert query["key"][0] is not None
+    file_path = query["key"][0]
+
     match = pattern.search(file_path)
     file_id = match.group(1)
 
@@ -386,8 +405,12 @@ def test_api_documents_attachment_upload_unsafe():
 
     assert response.status_code == 201
 
-    file_path = response.json()["file"]
-    pattern = re.compile(rf"^/media/{document.id!s}/attachments/(.*)\.exe")
+    pattern = re.compile(rf"^{document.id!s}/attachments/(.*)\.exe")
+    url_parsed = urlparse(response.json()["file"])
+    assert url_parsed.path == f"/api/v1.0/documents/{document.id!s}/media-check/"
+    query = parse_qs(url_parsed.query)
+    assert query["key"][0] is not None
+    file_path = query["key"][0]
     match = pattern.search(file_path)
     file_id = match.group(1)
 

@@ -18,11 +18,11 @@ import { Box, TextErrors } from '@/components';
 import { Doc, useIsCollaborativeEditable } from '@/docs/doc-management';
 import { useAuth } from '@/features/auth';
 
-import { useUploadFile } from '../hook';
-import { useHeadings } from '../hook/useHeadings';
+import { useHeadings, useUploadFile, useUploadStatus } from '../hook/';
 import useSaveDoc from '../hook/useSaveDoc';
 import { useEditorStore } from '../stores';
 import { cssEditor } from '../styles';
+import { DocsBlockNoteEditor } from '../types';
 import { randomColor } from '../utils';
 
 import { BlockNoteSuggestionMenu } from './BlockNoteSuggestionMenu';
@@ -63,7 +63,7 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
     : user?.full_name || user?.email || t('Anonymous');
   const showCursorLabels: 'always' | 'activity' | (string & {}) = 'activity';
 
-  const editor = useCreateBlockNote(
+  const editor: DocsBlockNoteEditor = useCreateBlockNote(
     {
       codeBlock,
       collaboration: {
@@ -127,7 +127,9 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
     },
     [collabName, lang, provider, uploadFile],
   );
+
   useHeadings(editor);
+  useUploadStatus(editor);
 
   useEffect(() => {
     setEditor(editor);
