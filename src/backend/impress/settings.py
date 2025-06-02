@@ -470,6 +470,8 @@ class Base(Configuration):
     SESSION_COOKIE_AGE = values.PositiveIntegerValue(
         default=60 * 60 * 12, environ_name="SESSION_COOKIE_AGE", environ_prefix=None
     )
+    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
 
     # OIDC - Authorization Code Flow
     OIDC_CREATE_USER = values.BooleanValue(
