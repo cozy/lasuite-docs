@@ -4,7 +4,7 @@ export default function RootLayout() {
   return (
     <Html>
       <Head />
-      <script src="https://unpkg.com/cozy-external-bridge@0.11.0/dist/embedded/bundle.js" />
+      <script src="https://unpkg.com/cozy-external-bridge@0.12.0/dist/embedded/bundle.js" />
       <body suppressHydrationWarning={process.env.NODE_ENV === 'development'}>
         <Main />
         <NextScript />
