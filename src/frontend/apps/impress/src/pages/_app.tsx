@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppProvider } from '@/core/';
@@ -18,6 +19,15 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   useOffline();
   const getLayout = Component.getLayout ?? ((page) => page);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const initBridge = async () => {
+      await window._cozyBridge.setupBridge('*');
+      window._cozyBridge.startHistorySyncing();
+    }
+
+    initBridge();
+  }, []);
 
   return (
     <>
