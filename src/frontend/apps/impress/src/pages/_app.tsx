@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppProvider } from '@/core/';
@@ -21,6 +22,15 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const { t } = useTranslation();
   const { componentTokens } = useCunninghamTheme();
   const favicon = componentTokens['favicon'];
+
+  useEffect(() => {
+    const initBridge = async () => {
+      await window._cozyBridge.setupBridge('*');
+      window._cozyBridge.startHistorySyncing();
+    }
+
+    initBridge();
+  }, []);
 
   return (
     <>
