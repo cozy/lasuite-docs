@@ -2,18 +2,34 @@ import { codeBlock } from '@blocknote/code-block';
 import {
   BlockNoteSchema,
   defaultBlockSpecs,
+  defaultInlineContentSpecs,
+  // filterSuggestionItems,
   withPageBreak,
 } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import * as locales from '@blocknote/core/locales';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import { useCreateBlockNote } from '@blocknote/react';
+import {
+  DefaultReactSuggestionItem,
+  SuggestionMenuController,
+  createReactInlineContentSpec,
+  useCreateBlockNote,
+} from '@blocknote/react';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Y from 'yjs';
 
+import IconAudio from '@/assets/icons/file-type-audio.svg';
+import IconCode from '@/assets/icons/file-type-code.svg';
+import IconFile from '@/assets/icons/file-type-files.svg';
+import IconImage from '@/assets/icons/file-type-image.svg';
+import IconNote from '@/assets/icons/file-type-note.svg';
+import IconPdf from '@/assets/icons/file-type-pdf.svg';
+import IconSheet from '@/assets/icons/file-type-sheet.svg';
+import IconSlide from '@/assets/icons/file-type-slide.svg';
+import IconText from '@/assets/icons/file-type-text.svg';
 import { Box, TextErrors } from '@/components';
 import { Doc, useIsCollaborativeEditable } from '@/docs/doc-management';
 import { useAuth } from '@/features/auth';
@@ -29,12 +45,108 @@ import { BlockNoteSuggestionMenu } from './BlockNoteSuggestionMenu';
 import { BlockNoteToolbar } from './BlockNoteToolBar/BlockNoteToolbar';
 import { CalloutBlock, DividerBlock } from './custom-blocks';
 
+// The Mention inline content.
+export const FileMention = createReactInlineContentSpec(
+  {
+    type: 'fileMention',
+    propSchema: {
+      filename: {
+        default: 'Unknown',
+      },
+      url: {
+        default: 'blank',
+      },
+      mimetype: {
+        default: 'application/octet-stream',
+      },
+    },
+    content: 'none',
+  },
+  {
+    render: (props) => {
+      console.log(props);
+      return (
+        <a
+          style={{
+            paddingRight: '4px',
+            paddingLeft: '4px',
+          }}
+          href={props.inlineContent.props.url}
+          target="_blank"
+        >
+          {getIconForMimeType(props.inlineContent.props.mimetype)}{' '}
+          {props.inlineContent.props.filename}
+        </a>
+      );
+    },
+  },
+);
+
+// Function to get appropriate icon based on MIME type
+const getIconForMimeType = (mimeType: string) => {
+  if (!mimeType) {
+    return <IconFile />;
+  }
+
+  const [type, subtype] = mimeType.split('/');
+
+  switch (type) {
+    case 'application': {
+      if (subtype === 'pdf') {
+        return <IconPdf />;
+      }
+      if (subtype.includes('spreadsheet')) {
+        return <IconSheet />;
+      } 
+      if (subtype.includes('presentation')) {
+        return <IconSlide />;
+      }
+      if (subtype.includes('xml') || subtype.includes('json')) {
+        return <IconCode />;
+      }
+      break;
+    }
+    case 'image':
+      return <IconImage />;
+    case 'audio':
+      return <IconAudio />;
+    case 'text':
+      if (subtype == 'vnd.cozy.note+markdown') {
+        return <IconNote />;
+      }
+      return <IconText />;
+    case 'sheet':
+      return <IconSheet />;
+    case 'slide':
+      return <IconSlide />;
+    default:
+      return <IconFile />;
+  }
+
+  return <IconFile />;
+};
+
+interface FileSearchResult {
+  doc: object | null;
+  slug: string | null;
+  title: string | null;
+  subTitle: string | null;
+  url: string | null;
+  secondaryUrl: string | null;
+}
+
 export const blockNoteSchema = withPageBreak(
   BlockNoteSchema.create({
     blockSpecs: {
       ...defaultBlockSpecs,
       callout: CalloutBlock,
       divider: DividerBlock,
+    },
+    inlineContentSpecs: {
+      // Adds all default inline content.
+      ...defaultInlineContentSpecs,
+      // Adds the mention tag.
+      fileMention: FileMention,
     },
   }),
 );
@@ -43,6 +155,33 @@ interface BlockNoteEditorProps {
   doc: Doc;
   provider: HocuspocusProvider;
 }
+
+// Function which gets all users for the mentions menu.
+const getFileMentionMenuItems = async (
+  editor: typeof blockNoteSchema.BlockNoteEditor,
+  query: string,
+): Promise<DefaultReactSuggestionItem[]> => {
+  const files = (await window._cozyBridge.search(
+    query.substring(1),
+  )) as FileSearchResult[];
+
+  return files.map((file) => ({
+    title: file.title || '',
+    onItemClick: () => {
+      editor.insertInlineContent([
+        {
+          type: 'fileMention',
+          props: {
+            filename: file?.title || '',
+            url: file?.url || '',
+            mimetype: file?.doc?.mime || '',
+          },
+        },
+        ' ', // add a space after the mention
+      ]);
+    },
+  }));
+};
 
 export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
   const { user } = useAuth();
@@ -165,6 +304,14 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
       >
         <BlockNoteSuggestionMenu />
         <BlockNoteToolbar />
+        {/* Adds a mentions menu which opens with the "@" key */}
+        <SuggestionMenuController
+          triggerCharacter="+"
+          getItems={async (query) => {
+            // Gets the mentions menu items
+            return await getFileMentionMenuItems(editor, query);
+          }}
+        />
       </BlockNoteView>
     </Box>
   );
