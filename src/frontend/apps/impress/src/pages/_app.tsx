@@ -25,10 +25,8 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   useEffect(() => {
     const initBridge = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await window._cozyBridge.setupBridge('*');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      window._cozyBridge.startHistorySyncing();
+      void window._cozyBridge.startHistorySyncing();
     };
 
     void initBridge();

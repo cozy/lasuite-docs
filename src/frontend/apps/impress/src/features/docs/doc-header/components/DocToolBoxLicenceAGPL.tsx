@@ -1,6 +1,5 @@
 import { Button, useModal } from '@openfun/cunningham-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-components';
@@ -29,7 +28,6 @@ import {
 import { useAnalytics } from '@/libs';
 import { useResponsiveStore } from '@/stores';
 
-import { useEditorStore } from '../../doc-editor';
 import { DocShareModal } from '../../doc-share';
 import { useCopyCurrentEditorToClipboard } from '../hooks/useCopyCurrentEditorToClipboard';
 
@@ -51,10 +49,6 @@ export const DocToolBoxLicenceAGPL = ({
 
   const { colorsTokens } = useCunninghamTheme();
 
-  const { editor } = useEditorStore();
-  const router = useRouter();
-  const { id } = router.query;
-
   const [isModalRemoveOpen, setIsModalRemoveOpen] = useState(false);
   const [isModalExportOpen, setIsModalExportOpen] = useState(false);
 
@@ -68,26 +62,6 @@ export const DocToolBoxLicenceAGPL = ({
     listInvalideQueries: [KEY_LIST_DOC, KEY_DOC],
   });
   const copyCurrentEditorToClipboard = useCopyCurrentEditorToClipboard();
-
-  const runPeriodicAsync = (
-    callback: () => Promise<void>,
-    delay: number = 10000,
-  ) => {
-    async function loop() {
-      while (true) {
-        await callback();
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-    loop().catch(console.error);
-  };
-
-  runPeriodicAsync(async () => {
-    const markdown = await editor?.blocksToMarkdownLossy();
-    console.log('Contenu Markdown:', markdown);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    window._cozyBridge.updateDocs({ docsId: id, content: markdown });
-  }, 10000);
 
   const options: DropdownMenuOption[] = [
     ...(isSmallMobile

@@ -1,6 +1,17 @@
 declare global {
   interface Window {
-    _cozyBridge?: object; // Replace 'any' with the actual type of _cozyBridge if known
+    _cozyBridge: {
+      updateDocs: (data: {
+        docsId: string;
+        content?: string;
+        name?: name;
+      }) => Promise<object>;
+      search: (
+        queryString: string,
+      ) => Promise<{ title: string; url: string }[]>;
+      setupBridge: (target: string) => Promise<void>;
+      startHistorySyncing: () => Promise<void>;
+    };
   }
 }
 
