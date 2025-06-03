@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { APIError, errorCauses, fetchAPI } from '@/api';
+import { useEditorStore } from '@/docs/doc-editor';
 import { Doc } from '@/features/docs';
 
 export type UpdateDocParams = Pick<Doc, 'id'> &
@@ -34,9 +35,17 @@ export function useUpdateDoc({
   listInvalideQueries,
 }: UpdateDocProps = {}) {
   const queryClient = useQueryClient();
+  const { editor } = useEditorStore();
+
   return useMutation<Doc, APIError, UpdateDocParams>({
     mutationFn: updateDoc,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      const markdown = await editor?.blocksToMarkdownLossy();
+
+      void window._cozyBridge.updateDocs({
+        docsId: data.id,
+        content: markdown,
+      });
       listInvalideQueries?.forEach((queryKey) => {
         void queryClient.invalidateQueries({
           queryKey: [queryKey],

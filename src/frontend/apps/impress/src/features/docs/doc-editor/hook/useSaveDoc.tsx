@@ -8,7 +8,7 @@ import { isFirefox } from '@/utils/userAgent';
 
 import { toBase64 } from '../utils';
 
-const SAVE_INTERVAL = 60000;
+const SAVE_INTERVAL = 5000;
 
 const useSaveDoc = (docId: string, yDoc: Y.Doc, canSave: boolean) => {
   const { mutate: updateDoc } = useUpdateDoc({
