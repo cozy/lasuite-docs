@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     const initBridge = async () => {
       await window._cozyBridge.setupBridge('*');
       window._cozyBridge.startHistorySyncing();
-    }
+    };
 
     initBridge();
   }, []);

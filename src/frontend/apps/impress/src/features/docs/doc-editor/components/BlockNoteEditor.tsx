@@ -97,7 +97,7 @@ const getIconForMimeType = (mimeType: string) => {
       }
       if (subtype.includes('spreadsheet')) {
         return <IconSheet />;
-      } 
+      }
       if (subtype.includes('presentation')) {
         return <IconSlide />;
       }
