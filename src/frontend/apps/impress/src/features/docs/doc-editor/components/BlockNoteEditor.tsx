@@ -3,7 +3,6 @@ import {
   BlockNoteSchema,
   defaultBlockSpecs,
   defaultInlineContentSpecs,
-  // filterSuggestionItems,
   withPageBreak,
 } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
@@ -64,7 +63,6 @@ export const FileMention = createReactInlineContentSpec(
   },
   {
     render: (props) => {
-      console.log(props);
       return (
         <a
           style={{
