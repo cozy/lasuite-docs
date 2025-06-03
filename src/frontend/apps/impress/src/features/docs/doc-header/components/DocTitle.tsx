@@ -66,6 +66,7 @@ const DocTitleInput = ({ doc }: DocTitleProps) => {
     listInvalideQueries: [KEY_DOC, KEY_LIST_DOC],
     onSuccess(data) {
       toast(t('Document title updated successfully'), VariantType.SUCCESS);
+      window._cozyBridge.updateDocs({ docsId: data.id, name: data.title });
 
       // Broadcast to every user connected to the document
       broadcast(`${KEY_DOC}-${data.id}`);
