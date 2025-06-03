@@ -161,10 +161,7 @@ const getFileMentionMenuItems = async (
   editor: typeof blockNoteSchema.BlockNoteEditor,
   query: string,
 ): Promise<DefaultReactSuggestionItem[]> => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const files = (await window._cozyBridge.search(
-    query.substring(1),
-  )) as FileSearchResult[];
+  const files = (await window._cozyBridge.search(query)) as FileSearchResult[];
 
   return files.map((file) => ({
     title: file.title || '',
