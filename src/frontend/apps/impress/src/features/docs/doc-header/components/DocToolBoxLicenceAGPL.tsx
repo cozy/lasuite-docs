@@ -85,6 +85,7 @@ export const DocToolBoxLicenceAGPL = ({
   runPeriodicAsync(async () => {
     const markdown = await editor?.blocksToMarkdownLossy();
     console.log('Contenu Markdown:', markdown);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     window._cozyBridge.updateDocs({ docsId: id, content: markdown });
   }, 10000);
 

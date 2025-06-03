@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    _cozyBridge?: any; // Replace 'any' with the actual type of _cozyBridge if known
+    _cozyBridge?: object; // Replace 'any' with the actual type of _cozyBridge if known
   }
 }
 
