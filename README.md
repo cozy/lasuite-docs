@@ -158,6 +158,31 @@ You first need to create a superuser account:
 $ make superuser
 ```
 
+## Cozy specific
+
+### cozy-external-bridge
+
+The cozy-external-bridge lib is used to make a bridge between Docs and the Cozy platform.
+
+It is injected in the `src/frontend/apps/impress/src/pages/_document.tsx` file. 
+To upgrade it, you just need to increase the package version in the URL.
+
+During development, you might want to manually upgrade by doing something like:
+
+```
+<script>
+  {`
+    <bundle_content>
+  `}
+</script>
+```
+
+The bundle content can be found in `cozy-external-bridge/dist/embedded/bundle.js`. 
+
+⚠ Beware of backtilde `` in the bundle content, it should be escaped or removed.
+
+
+
 ## Feedback 🙋‍♂️🙋‍♀️
 
 We'd love to hear your thoughts, and hear about your experiments, so come and say hi on [Matrix](https://matrix.to/#/#docs-official:matrix.org).
