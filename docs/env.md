@@ -56,6 +56,7 @@ These are the environment variables you can set for the `impress-backend` contai
 | DJANGO_CELERY_BROKER_URL                        | celery broker url                                                                             | redis://redis:6379/0                                    |
 | DJANGO_CELERY_BROKER_TRANSPORT_OPTIONS          | celery broker transport options                                                               | {}                                                      |
 | SESSION_COOKIE_AGE                              | duration of the cookie session                                                                | 60*60*12                                                |
+| SESSION_EXPIRE_AT_BROWSER_CLOSE                 | expire cookie session when the user closes their browser                                      | false                                                   |
 | OIDC_CREATE_USER                                | create used on OIDC                                                                           | false                                                   |
 | OIDC_RP_SIGN_ALGO                               | verification algorithm used OIDC tokens                                                       | RS256                                                   |
 | OIDC_RP_CLIENT_ID                               | client id used for OIDC                                                                       | impress                                                 |

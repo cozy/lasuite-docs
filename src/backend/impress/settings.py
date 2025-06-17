@@ -470,6 +470,9 @@ class Base(Configuration):
     SESSION_COOKIE_AGE = values.PositiveIntegerValue(
         default=60 * 60 * 12, environ_name="SESSION_COOKIE_AGE", environ_prefix=None
     )
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = values.BooleanValue(
+        default=False, environ_name="SESSION_EXPIRE_AT_BROWSER_CLOSE", environ_prefix=None
+    )
     SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SECURE = True
 
