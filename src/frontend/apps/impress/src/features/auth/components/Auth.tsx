@@ -24,14 +24,6 @@ export const Auth = ({ children }: PropsWithChildren) => {
   }
 
   /**
-   * If the user is authenticated and the service is run as a Cozy app
-   * then go directly to login
-   */
-  if (window._cozyBridge && !authenticated) {
-    gotoLogin();
-  }
-
-  /**
    * If the user is authenticated and wanted initially to access a document,
    * we redirect to the document page.
    */
