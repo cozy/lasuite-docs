@@ -81,16 +81,13 @@ nextjs-portal {
   background-color: white;
   border: 1px solid lightgray;
   border-radius: 8px;
-  box-shadow: 0 0 8px #dddddd;
-
+  box-shadow: 0 0 8px #ddd;
   display: flex;
   flex-direction: column;
   height: fit-content;
   max-height: inherit;
-
   overflow: auto;
   color: #3a3a3a;
-
   padding: 2px;
   gap: 2px;
   top: 8px;
@@ -99,13 +96,10 @@ nextjs-portal {
 .slash-menu-item {
   background-color: white;
   border-radius: 8px;
-
   cursor: pointer;
-
   align-items: center;
   display: flex;
   flex-direction: row;
-
   padding: 8px;
 }
 
@@ -126,5 +120,5 @@ nextjs-portal {
 
 .slash-menu-item:hover,
 .slash-menu-item.selected {
-  background-color: rgba(10, 10, 10, 0.05);
+  background-color: rgb(10 10 10 / 5%);
 }
