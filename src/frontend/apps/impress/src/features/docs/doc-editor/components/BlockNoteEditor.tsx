@@ -12,6 +12,7 @@ import '@blocknote/mantine/style.css';
 import {
   DefaultReactSuggestionItem,
   SuggestionMenuController,
+  SuggestionMenuProps,
   createReactInlineContentSpec,
   useCreateBlockNote,
 } from '@blocknote/react';
@@ -125,12 +126,48 @@ const getIconForMimeType = (mimeType: string) => {
 };
 
 interface FileSearchResult {
-  doc: { mime: string | null } | null;
+  doc: { path: string | undefined; mime: string | undefined } | null;
   slug: string | null;
   title: string | null;
   subTitle: string | null;
   url: string | null;
   secondaryUrl: string | null;
+}
+
+interface FileMentionSuggestionItem extends DefaultReactSuggestionItem {
+  mimetype: string;
+  path: string;
+}
+
+function CustomSlashMenu(
+  props: SuggestionMenuProps<FileMentionSuggestionItem>,
+) {
+  return (
+    <div className="slash-menu">
+      {props.items.map((item, index) => (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div
+          key={index}
+          role="button"
+          tabIndex={0}
+          className={`slash-menu-item ${
+            props.selectedIndex === index ? 'selected' : ''
+          }`}
+          onClick={() => {
+            props.onItemClick?.(item);
+          }}
+        >
+          <div className="slash-menu-icon">
+            {getIconForMimeType(item.mimetype || '')}
+          </div>
+          <div className="slash-menu-text-wrapper">
+            <div className="slash-menu-text-title">{item.title}</div>
+            <div className="slash-menu-text-path">{item.path}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export const blockNoteSchema = withPageBreak(
@@ -158,11 +195,13 @@ interface BlockNoteEditorProps {
 const getFileMentionMenuItems = async (
   editor: typeof blockNoteSchema.BlockNoteEditor,
   query: string,
-): Promise<DefaultReactSuggestionItem[]> => {
+): Promise<FileMentionSuggestionItem[]> => {
   const files = (await window._cozyBridge.search(query)) as FileSearchResult[];
 
   return files.map((file) => ({
     title: file.title || '',
+    path: file?.doc?.path || '',
+    mimetype: file?.doc?.mime || '',
     onItemClick: () => {
       editor.insertInlineContent([
         {
@@ -300,9 +339,11 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
       >
         <BlockNoteSuggestionMenu />
         <BlockNoteToolbar />
-        {/* Adds a mentions menu which opens with the "@" key */}
+        {/* Adds a mentions menu which opens with the "+" key */}
         <SuggestionMenuController
           triggerCharacter="+"
+          // @ts-expect-error Fix type
+          suggestionMenuComponent={CustomSlashMenu}
           getItems={async (query) => {
             // Gets the mentions menu items
             return await getFileMentionMenuItems(editor, query);
