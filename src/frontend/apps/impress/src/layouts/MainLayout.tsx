@@ -22,6 +22,8 @@ export function MainLayout({
   const currentBackgroundColor = !isDesktop ? 'white' : backgroundColor;
   const hasContent = !window._cozyBridge;
 
+  const shouldShowLeftPanel = !window._cozyBridge;
+
   return (
     <Box className="--docs--main-layout">
       <Header hasContent={hasContent} />
@@ -30,7 +32,7 @@ export function MainLayout({
         $margin={{ top: `${hasContent ? HEADER_HEIGHT : 0}px` }}
         $width="100%"
       >
-        <LeftPanel />
+        {shouldShowLeftPanel && <LeftPanel />}
         <Box
           as="main"
           id={MAIN_LAYOUT_ID}
