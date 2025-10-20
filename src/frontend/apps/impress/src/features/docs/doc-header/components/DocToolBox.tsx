@@ -32,6 +32,7 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
   const modalShare = useModal();
 
   const { isSmallMobile } = useResponsiveStore();
+  const cozyBridge = window._cozyBridge;
 
   useEffect(() => {
     if (modalHistory.isOpen) {
@@ -64,7 +65,12 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
               <Button
                 color="tertiary-text"
                 onClick={() => {
-                  modalShare.open();
+                  if (cozyBridge) {
+                    window.top?.postMessage('shareFile', '*');
+                  }
+                  else {
+                    modalShare.open();
+                  }
                 }}
                 size={isSmallMobile ? 'small' : 'medium'}
               >
