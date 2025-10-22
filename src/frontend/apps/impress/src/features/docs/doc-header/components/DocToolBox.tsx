@@ -1,7 +1,7 @@
 import { Button, useModal } from '@openfun/cunningham-react';
 import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { css } from 'styled-components';
 
@@ -32,7 +32,14 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
   const modalShare = useModal();
 
   const { isSmallMobile } = useResponsiveStore();
-  const cozyBridge = window._cozyBridge;
+  
+  const [isInsideCozy, setIsInsideCozy] = useState(false);
+    useEffect(() => {
+      // @ts-expect-error cozyBridge is injected by Cozy platform
+      window._cozyBridge.requestParentOrigin().then(origin => {
+        setIsInsideCozy(Boolean(origin));
+      });
+    }, []);
 
   useEffect(() => {
     if (modalHistory.isOpen) {
@@ -65,7 +72,7 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
               <Button
                 color="tertiary-text"
                 onClick={() => {
-                  if (cozyBridge) {
+                  if (isInsideCozy) {
                     window.top?.postMessage('shareFile', '*');
                   }
                   else {

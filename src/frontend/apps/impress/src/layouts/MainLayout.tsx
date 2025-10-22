@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import { css } from 'styled-components';
 
 import { Box } from '@/components';
@@ -24,9 +24,17 @@ export function MainLayout({
   const router = useRouter();
 
   const currentBackgroundColor = !isDesktop ? 'white' : backgroundColor;
-  const hasContent = !window._cozyBridge;
 
-  const shouldShowLeftPanel = !window._cozyBridge;
+  const [isInsideCozy, setIsInsideCozy] = useState(false);
+  useEffect(() => {
+    // @ts-expect-error cozyBridge is injected by Cozy platform
+    window._cozyBridge.requestParentOrigin().then(origin => {
+      setIsInsideCozy(Boolean(origin));
+    });
+  }, []);
+
+  const hasContent = !isInsideCozy;
+  const shouldShowLeftPanel = !isInsideCozy;
 
   const { mutate: createDoc, isPending: isCreatingDoc } = useCreateDoc({
     onSuccess: (doc) => {
