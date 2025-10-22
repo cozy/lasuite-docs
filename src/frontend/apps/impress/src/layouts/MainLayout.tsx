@@ -30,6 +30,9 @@ export function MainLayout({
     // @ts-expect-error cozyBridge is injected by Cozy platform
     window._cozyBridge.requestParentOrigin().then(origin => {
       setIsInsideCozy(Boolean(origin));
+      if(Boolean(origin)) {
+        window.top?.postMessage('embedded', '*')
+      }
     });
   }, []);
 
