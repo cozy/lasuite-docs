@@ -32,14 +32,14 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
   const modalShare = useModal();
 
   const { isSmallMobile } = useResponsiveStore();
-  
+
   const [isInsideCozy, setIsInsideCozy] = useState(false);
-    useEffect(() => {
-      // @ts-expect-error cozyBridge is injected by Cozy platform
-      window._cozyBridge.requestParentOrigin().then(origin => {
-        setIsInsideCozy(Boolean(origin));
-      });
-    }, []);
+  useEffect(() => {
+    // @ts-expect-error cozyBridge is injected by Cozy platform
+    window._cozyBridge.requestParentOrigin().then((origin) => {
+      setIsInsideCozy(Boolean(origin));
+    });
+  }, []);
 
   useEffect(() => {
     if (modalHistory.isOpen) {
@@ -74,8 +74,7 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
                 onClick={() => {
                   if (isInsideCozy) {
                     window.top?.postMessage('shareFile', '*');
-                  }
-                  else {
+                  } else {
                     modalShare.open();
                   }
                 }}
