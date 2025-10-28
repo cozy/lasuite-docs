@@ -28,10 +28,10 @@ export function MainLayout({
   const [isInsideCozy, setIsInsideCozy] = useState(false);
   useEffect(() => {
     // @ts-expect-error cozyBridge is injected by Cozy platform
-    window._cozyBridge.requestParentOrigin().then(origin => {
+    window._cozyBridge.requestParentOrigin().then((origin) => {
       setIsInsideCozy(Boolean(origin));
-      if(Boolean(origin)) {
-        window.top?.postMessage('embedded', '*')
+      if (Boolean(origin)) {
+        window.top?.postMessage('embedded', '*');
       }
     });
   }, []);
@@ -47,12 +47,13 @@ export function MainLayout({
 
   useEffect(() => {
     window.onmessage = function (e) {
-      if (e.data == undefined || e.data == null || typeof e.data !== "string") return;
-      if (e.data.startsWith("newDoc")) {
+      if (e.data == undefined || e.data == null || typeof e.data !== 'string')
+        return;
+      if (e.data.startsWith('newDoc')) {
         createDoc();
       }
-      if (e.data.startsWith("openFile:")) {
-        const fileId = e.data.split("openFile:")[1].trim();
+      if (e.data.startsWith('openFile:')) {
+        const fileId = e.data.split('openFile:')[1].trim();
         router.push(`/docs/${fileId}`);
       }
     };
