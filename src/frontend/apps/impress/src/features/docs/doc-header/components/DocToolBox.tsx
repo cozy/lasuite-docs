@@ -36,6 +36,7 @@ export const DocToolBox = ({ doc }: DocToolBoxProps) => {
   const [isInsideCozy, setIsInsideCozy] = useState(false);
   useEffect(() => {
     // @ts-expect-error cozyBridge is injected by Cozy platform
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     window._cozyBridge.requestParentOrigin().then((origin) => {
       setIsInsideCozy(Boolean(origin));
     });

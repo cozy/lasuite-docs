@@ -1,15 +1,15 @@
+import { useRouter } from 'next/router';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { css } from 'styled-components';
 
 import { Box } from '@/components';
 import { useCunninghamTheme } from '@/cunningham';
+import { useCreateDoc } from '@/features/docs';
 import { Header } from '@/features/header';
 import { HEADER_HEIGHT } from '@/features/header/conf';
 import { LeftPanel } from '@/features/left-panel';
 import { MAIN_LAYOUT_ID } from '@/layouts/conf';
 import { useResponsiveStore } from '@/stores';
-import { useCreateDoc } from '@/features/docs';
-import { useRouter } from 'next/router';
 
 type MainLayoutProps = {
   backgroundColor?: 'white' | 'grey';
@@ -28,6 +28,7 @@ export function MainLayout({
   const [isInsideCozy, setIsInsideCozy] = useState(false);
   useEffect(() => {
     // @ts-expect-error cozyBridge is injected by Cozy platform
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     window._cozyBridge.requestParentOrigin().then((origin) => {
       setIsInsideCozy(Boolean(origin));
       if (Boolean(origin)) {
@@ -39,24 +40,29 @@ export function MainLayout({
   const hasContent = !isInsideCozy;
   const shouldShowLeftPanel = !isInsideCozy;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { mutate: createDoc, isPending: isCreatingDoc } = useCreateDoc({
     onSuccess: (doc) => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       router.push(`/docs/${doc.id}`);
     },
   });
 
   useEffect(() => {
     window.onmessage = function (e) {
-      if (e.data == undefined || e.data == null || typeof e.data !== 'string')
+      if (e.data == undefined || e.data == null || typeof e.data !== 'string') {
         return;
+      }
       if (e.data.startsWith('newDoc')) {
         createDoc();
       }
       if (e.data.startsWith('openFile:')) {
         const fileId = e.data.split('openFile:')[1].trim();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         router.push(`/docs/${fileId}`);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
