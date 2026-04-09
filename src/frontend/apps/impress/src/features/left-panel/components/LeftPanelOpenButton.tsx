@@ -53,7 +53,6 @@ export const LeftPanelOpenButton = () => {
       )
     ) {
       mimeTypes.add(ContentTypes.Markdown);
-      mimeTypes.add('text/plain');
     }
 
     return Array.from(mimeTypes);
@@ -76,8 +75,7 @@ export const LeftPanelOpenButton = () => {
     );
     const byMime =
       result.mimeType === ContentTypes.Docx ||
-      result.mimeType === ContentTypes.Markdown ||
-      result.mimeType === 'text/plain';
+      result.mimeType === ContentTypes.Markdown;
 
     return byExtension || byMime;
   };
@@ -88,7 +86,9 @@ export const LeftPanelOpenButton = () => {
       const res = await openBuro.openFile({
         allowedMimeType,
         multiple: false,
+        type: "content",
       });
+
 
       if (res.status === 'error') {
         toast(res.message, VariantType.ERROR);
@@ -96,6 +96,7 @@ export const LeftPanelOpenButton = () => {
       }
 
       const selectedFile = res.results[0];
+      console.log('Selected file from OpenBuro:', selectedFile);
       if (!selectedFile) {
         toast(
           t(`The document "{{documentName}}" import has failed`, {
@@ -119,29 +120,22 @@ export const LeftPanelOpenButton = () => {
         return;
       }
 
-      const fileUrl = selectedFile.downloadUrl || selectedFile.sharingUrl;
-      if (!fileUrl) {
-        toast(
-          t(`The document "{{documentName}}" import has failed`, {
-            documentName: selectedFile.name,
-          }),
-          VariantType.ERROR,
-        );
-        return;
-      }
+      const fileBase64Data = selectedFile.payload;
+      const fileBase64Url = `data:${selectedFile.mimeType};base64,${fileBase64Data}`;
 
-      setIsSkeletonVisible(true);
-      const response = await fetch(fileUrl);
+      // Fetch the file as a blob to get its MIME type and create a File object
+      const response = await fetch(fileBase64Url);
       if (!response.ok) {
-        throw new Error(`Failed to download file: ${response.status}`);
+        throw new Error(`Failed to fetch file data: ${response.status}`);
       }
 
       const blob = await response.blob();
-      const mimeType =
-        selectedFile.mimeType || blob.type || ContentTypes.OctetStream;
+      console.log('Fetched blob from base64 data:', blob);
+      const mimeType = blob.type || selectedFile.mimeType || 'application/octet-stream';
       const file = new File([blob], selectedFile.name, {
         type: mimeType,
       });
+
       const importedDoc = await importDocAsync([file, mimeType]);
 
       setIsNavigating(true);
