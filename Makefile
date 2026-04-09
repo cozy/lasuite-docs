@@ -163,7 +163,7 @@ endif
 .PHONY: post-beautiful-bootstrap
 
 create-docker-network: ## create the docker network if it doesn't exist
-	@docker network create lasuite-network || true
+## @docker network create lasuite-network || true
 .PHONY: create-docker-network
 
 bootstrap: ## Prepare the project for local development

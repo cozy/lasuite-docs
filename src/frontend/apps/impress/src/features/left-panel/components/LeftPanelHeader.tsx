@@ -12,6 +12,7 @@ import { useCmdK } from '@/hooks/useCmdK';
 import { useLeftPanelStore } from '../stores';
 
 import { LeftPanelHeaderButton } from './LeftPanelHeaderButton';
+import { LeftPanelOpenButton } from './LeftPanelOpenButton';
 
 const DocSearchModal = dynamic(
   () =>
@@ -60,7 +61,12 @@ export const LeftPanelHeader = ({ children }: PropsWithChildren) => {
             $justify="space-between"
             $align="center"
           >
-            {authenticated && <LeftPanelHeaderButton />}
+            {authenticated && (
+              <Box $direction="row" $gap="6px">
+                <LeftPanelHeaderButton />
+                <LeftPanelOpenButton />
+              </Box>
+            )}
             {(router.pathname !== '/' || authenticated) && (
               <Box $direction="row" $gap="2px">
                 {router.pathname !== '/' && (

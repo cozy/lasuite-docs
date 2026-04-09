@@ -1,0 +1,46 @@
+[
+  { 
+    "id":"demo-openburo-1",
+    "name":"Démo OpenBuro 1",
+    "url":"data:text",
+    "version":"",
+    "capabilities":[
+      {
+        "action":"SAVE",
+        "properties":{
+            "mimeTypes":["*/*"]
+        },
+        "path":"html;charset=utf-8,%3Ch2%3ESAVE%20OpenBuro 1%3C%2Fh2%3E"
+      },
+      {
+        "action":"PICK",
+        "properties":{
+            "mimeTypes":["*/*"]
+        },
+        "path":"html;charset=utf-8,%3Ch2%3EPICK%20OpenBuro 1%3C%2Fh2%3E"
+      }
+    ]
+  },
+  { 
+    "id":"demo-openburo-2",
+    "name":"Démo OpenBuro 2",
+    "url":"data:text",
+    "version":"",
+    "capabilities":[
+      {
+        "action":"SAVE",
+        "properties":{
+            "mimeTypes":["*/*"]
+        },
+        "path":"html;charset=utf-8,%3Ch2%3ESAVE%20OpenBuro 2%3C%2Fh2%3E"
+      },
+      {
+        "action":"PICK",
+        "properties":{
+            "mimeTypes":["*/*"]
+        },
+        "path":"html;charset=utf-8,%3Ch2%3EPICK%20OpenBuro 2%3C%2Fh2%3E"
+      }
+    ]
+  }
+]

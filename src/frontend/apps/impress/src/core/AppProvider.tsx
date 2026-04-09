@@ -12,6 +12,7 @@ import { useResponsiveStore } from '@/stores/';
 
 import { ConfigProvider } from './config/';
 import { ThemeProvider } from './config/ThemeProvider';
+import { OpenBuroProvider } from '@/features/openburo/OpenBuroProvider';
 
 export const DEFAULT_QUERY_RETRY = 1;
 
@@ -74,7 +75,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ConfigProvider>
-          <Auth>{children}</Auth>
+          <Auth>
+            <OpenBuroProvider>
+              {children}
+            </OpenBuroProvider>
+          </Auth>
         </ConfigProvider>
       </ThemeProvider>
     </QueryClientProvider>

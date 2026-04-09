@@ -8,6 +8,7 @@ import '@/i18n/initI18n';
 import { NextPageWithLayout } from '@/types/next';
 
 import './globals.css';
+import '@/features/openburo/OpenBuroModal.css';
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;

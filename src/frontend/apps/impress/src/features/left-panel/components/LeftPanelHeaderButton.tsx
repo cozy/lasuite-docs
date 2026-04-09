@@ -55,7 +55,7 @@ export const LeftPanelHeaderButton = () => {
       icon={<Icon $color="inherit" iconName="add" aria-hidden="true" />}
       disabled={isLoading}
     >
-      {t('New doc')}
+      {t('New')}
     </Button>
   );
 };
