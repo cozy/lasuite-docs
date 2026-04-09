@@ -11,8 +11,11 @@ export const OpenBuroServicePicker = ({
 }: OpenBuroServicePickerProps) => {
   return (
     <div className="openburo-modal-picker">
+      <h3 className="openburo-modal-picker-over-title">
+        Select a service to complete this action
+      </h3>
       <h2 className="openburo-modal-picker-title">
-        Select a service to continue this action
+        Pick a file
       </h2>
       <div className="openburo-modal-picker-list">
         {availableServices.map((service) => (

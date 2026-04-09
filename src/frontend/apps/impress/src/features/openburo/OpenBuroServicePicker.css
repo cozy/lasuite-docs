@@ -3,16 +3,26 @@
   font-family: 'Inter', sans-serif;
 }
 
+.openburo-modal-picker-over-title {
+  margin: 0 0 16px;
+  font-size: 14px;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
 .openburo-modal-picker-title {
   margin: 0 0 16px;
-  font-size: 16px;
+  font-size: 24px;
+  line-height: 24px;
   font-weight: 700;
+  margin-top: -4px;
 }
 
 .openburo-modal-picker-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 24px;
 }
 
 .openburo-modal-picker-item {
@@ -28,6 +38,7 @@
   line-height: 1.4;
   cursor: pointer;
   transition: all 0.1s ease;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .openburo-modal-picker-item:hover {
