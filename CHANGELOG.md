@@ -6,6 +6,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+🐛(frontend) abort check media status unmount #2194
+
 ## [v4.8.6] - 2026-04-08
 
 ### Added

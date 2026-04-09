@@ -72,8 +72,9 @@ const UploadLoaderBlockComponent = ({
     }
 
     const url = block.props.blockUploadUrl;
+    const controller = new AbortController();
 
-    loopCheckDocMediaStatus(url)
+    loopCheckDocMediaStatus(url, controller.signal)
       .then((response) => {
         // Add random delay to reduce collision probability during collaboration
         const randomDelay = Math.random() * 800;
@@ -101,7 +102,11 @@ const UploadLoaderBlockComponent = ({
           }
         }, randomDelay);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
         console.error('Error analyzing file:', error);
 
         try {
@@ -118,6 +123,10 @@ const UploadLoaderBlockComponent = ({
           /* During collaboration, another user might have updated the block */
         }
       });
+
+    return () => {
+      controller.abort();
+    };
   }, [block, editor, mediaUrl, isEditable]);
 
   return (
