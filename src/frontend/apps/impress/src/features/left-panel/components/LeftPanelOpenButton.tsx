@@ -86,7 +86,7 @@ export const LeftPanelOpenButton = () => {
       const res = await openBuro.openFile({
         allowedMimeType,
         multiple: false,
-        type: "content",
+        type: "payload",
       });
 
 
