@@ -1,30 +1,9 @@
 [
   { 
-    "id":"demo-openburo-1",
-    "name":"Démo OpenBuro 1",
-    "url":"data:text",
-    "version":"",
-    "capabilities":[
-      {
-        "action":"SAVE",
-        "properties":{
-            "mimeTypes":["*/*"]
-        },
-        "path":"html;charset=utf-8,%3Ch2%3ESAVE%20OpenBuro 1%3C%2Fh2%3E"
-      },
-      {
-        "action":"PICK",
-        "properties":{
-            "mimeTypes":["*/*"]
-        },
-        "path":"html;charset=utf-8,%3Ch2%3EPICK%20OpenBuro 1%3C%2Fh2%3E"
-      }
-    ]
-  },
-  { 
     "id":"webdav-picker",
     "name":"WebDAV File Picker",
     "url":"http://10.4.0.32:5000",
+    "display": "modal",
     "version":"",
     "capabilities":[
       {
@@ -35,5 +14,39 @@
         "path":"browse"
       }
     ]
+  },
+  { 
+    "id":"twake-drive",
+    "name":"Twake Drive",
+    "url":"http://drive.twp.localhost:8080",
+    "display": "popup",
+    "version":"",
+    "capabilities":[
+      {
+        "action":"PICK",
+        "properties":{
+            "mimeTypes":["*/*"]
+        },
+        "path":"capabilities/PICK"
+      }
+    ]
+  },
+  {
+    "capabilities": [
+      {
+        "action": "PICK",
+        "path": "embed/file-picker",
+        "properties": {
+          "mimeTypes": [
+            "*/*"
+          ]
+        }
+      }
+    ],
+    "id": "fichiers-file-picker",
+    "name": "Fichiers File Picker",
+    "url": "https://837a-46-255-204-128.ngrok-free.app",
+    "version": "1",
+    "display": "modal"
   }
 ]

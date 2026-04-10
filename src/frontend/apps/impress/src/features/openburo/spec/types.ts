@@ -39,6 +39,7 @@ export type OpenBuroService = {
   id: string;
   name: string;
   url: string;
+  display?: string;
   version?: string;
   capabilities: OpenBuroCapability[];
 };

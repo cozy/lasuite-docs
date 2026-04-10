@@ -1,13 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
 import {
   VariantType,
   useToastProvider,
 } from '@gouvfr-lasuite/cunningham-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import discovery from '../discovery.json';
 import { OpenBuroPickClient } from '../spec/OpenBuroPickClient';
-import { OpenBuroService, OpenFileParams } from '../spec/types';
+import {
+  OpenBuroService,
+  OpenFileParams,
+  OpenFileResult,
+} from '../spec/types';
 
 import { OpenBuroModal } from './OpenBuroModal';
 import { OpenBuroContextValue } from './types';
@@ -31,6 +35,7 @@ export const OpenBuroProvider = ({
     [],
   );
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const popupWindowRef = useRef<Window | null>(null);
   const clientRef = useRef<OpenBuroPickClient | null>(null);
 
   if (clientRef.current === null) {
@@ -41,6 +46,10 @@ export const OpenBuroProvider = ({
   }
 
   const closeModals = ({ rejectPending }: { rejectPending: boolean }) => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close();
+    }
+    popupWindowRef.current = null;
     setIsModalOpen(false);
     setIsServicePickerOpen(false);
     setAvailableServices([]);
@@ -53,19 +62,62 @@ export const OpenBuroProvider = ({
     }
   };
 
-  const openServiceModal = (service: OpenBuroService) => {
-    clientRef.current?.selectService(service, (nextIframeUrl) => {
-      setIframeUrl(nextIframeUrl);
+  const showImportErrorToast = () => {
+    toast(
+      t('The document "{{documentName}}" import has failed', {
+        documentName: '',
+      }),
+      VariantType.ERROR,
+    );
+  };
+
+  const openServiceUi = (service: OpenBuroService, nextIframeUrl: string) => {
+    if (service.display?.toLowerCase() === 'popup') {
+      if (popupWindowRef.current && !popupWindowRef.current.closed) {
+        popupWindowRef.current.close();
+      }
+
+      const openedWindow = window.open(
+        nextIframeUrl,
+        'openburo-picker',
+        'popup=yes,width=1000,height=800',
+      );
+
+      if (!openedWindow) {
+        clientRef.current?.cancelPending(
+          new Error('OpenBuro popup was blocked'),
+        );
+        showImportErrorToast();
+        return;
+      }
+
+      popupWindowRef.current = openedWindow;
+      setIframeUrl(null);
       setIsServicePickerOpen(false);
-      setIsModalOpen(true);
-    });
+      setIsModalOpen(false);
+      return;
+    }
+
+    popupWindowRef.current = null;
+    setIframeUrl(nextIframeUrl);
+    setIsServicePickerOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const openServiceModal = (service: OpenBuroService) => {
+    clientRef.current?.selectService(
+      service,
+      (selectedService, nextIframeUrl) => {
+        openServiceUi(selectedService, nextIframeUrl);
+      },
+    );
   };
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const result = clientRef.current?.handleMessage(
         event,
-        iframeRef.current?.contentWindow ?? null,
+        popupWindowRef.current ?? iframeRef.current?.contentWindow ?? null,
       );
 
       if (result === 'resolved' || result === 'rejected') {
@@ -79,15 +131,6 @@ export const OpenBuroProvider = ({
     };
   }, []);
 
-  const showImportErrorToast = () => {
-    toast(
-      t('The document "{{documentName}}" import has failed', {
-        documentName: '',
-      }),
-      VariantType.ERROR,
-    );
-  };
-
   const isOpenBuroCancellation = (error: unknown) => {
     if (!(error instanceof Error)) {
       return false;
@@ -99,6 +142,49 @@ export const OpenBuroProvider = ({
     );
   };
 
+  const blobToBase64 = async (blob: Blob) => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Failed to read downloaded file'));
+      reader.readAsDataURL(blob);
+    });
+
+    const separatorIndex = dataUrl.indexOf(',');
+    if (separatorIndex === -1) {
+      throw new Error('Invalid downloaded file format');
+    }
+
+    return dataUrl.slice(separatorIndex + 1);
+  };
+
+  const withDownloadedPayload = async (result: OpenFileResult) => {
+    if (typeof result.payload === 'string' && result.payload.length > 0) {
+      return result;
+    }
+
+    if (!result.downloadUrl) {
+      return result;
+    }
+
+    const downloadedResponse = await fetch(result.downloadUrl);
+    if (!downloadedResponse.ok) {
+      throw new Error(
+        `Failed to download OpenBuro file from URL: ${downloadedResponse.status}`,
+      );
+    }
+
+    const blob = await downloadedResponse.blob();
+    const payload = await blobToBase64(blob);
+
+    return {
+      ...result,
+      payload,
+      mimeType: result.mimeType || blob.type || 'application/octet-stream',
+      size: result.size || blob.size,
+    };
+  };
+
   const openFile = async (params?: OpenFileParams) => {
     try {
       const openFilePromise = clientRef.current?.openFile(params, {
@@ -106,10 +192,8 @@ export const OpenBuroProvider = ({
           setAvailableServices(services);
           setIsServicePickerOpen(true);
         },
-        onOpenIframe: (nextIframeUrl) => {
-          setIframeUrl(nextIframeUrl);
-          setIsServicePickerOpen(false);
-          setIsModalOpen(true);
+        onOpenService: (service, nextIframeUrl) => {
+          openServiceUi(service, nextIframeUrl);
         },
       });
       if (!openFilePromise) {
@@ -120,9 +204,17 @@ export const OpenBuroProvider = ({
 
       if (response.status === 'error') {
         showImportErrorToast();
+        return response;
       }
 
-      return response;
+      const results = await Promise.all(
+        response.results.map(withDownloadedPayload),
+      );
+
+      return {
+        ...response,
+        results,
+      };
     } catch (error) {
       if (!isOpenBuroCancellation(error)) {
         showImportErrorToast();

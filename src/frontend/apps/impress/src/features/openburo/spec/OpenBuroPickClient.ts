@@ -14,7 +14,7 @@ type PendingPromise = {
 
 type OpenFileCallbacks = {
   onRequireServiceSelection: (services: OpenBuroService[]) => void;
-  onOpenIframe: (iframeUrl: string) => void;
+  onOpenService: (service: OpenBuroService, iframeUrl: string) => void;
 };
 
 type HandleMessageResult = 'ignored' | 'resolved' | 'rejected';
@@ -69,7 +69,7 @@ export class OpenBuroPickClient {
           }
 
           if (matchingServices.length === 1) {
-            this.selectService(matchingServices[0], callbacks.onOpenIframe);
+            this.selectService(matchingServices[0], callbacks.onOpenService);
             return;
           }
 
@@ -84,7 +84,7 @@ export class OpenBuroPickClient {
 
   selectService(
     service: OpenBuroService,
-    onOpenIframe: (iframeUrl: string) => void,
+    onOpenService: (service: OpenBuroService, iframeUrl: string) => void,
   ) {
     const capability = getCapabilityForService(service, this.action);
     if (!capability) {
@@ -111,7 +111,7 @@ export class OpenBuroPickClient {
 
     this.currentServiceOrigin =
       requestUrl.origin === 'null' ? null : requestUrl.origin;
-    onOpenIframe(requestUrl.toString());
+    onOpenService(service, requestUrl.toString());
   }
 
   handleMessage(
@@ -136,6 +136,8 @@ export class OpenBuroPickClient {
     ) {
       return 'ignored';
     }
+
+    console.debug('OpenBuroPickClient received message', event.data);
 
     if (!isRecord(event.data)) {
       return 'ignored';
@@ -189,8 +191,8 @@ export class OpenBuroPickClient {
 
   private isStatusEvent(
     data: unknown,
-    status: 'error' | 'cancel',
-  ): data is { status: 'error' | 'cancel'; message?: unknown } {
+    status: 'error' | 'cancel' | 'close',
+  ): data is { status: 'error' | 'cancel' | 'close'; message?: unknown } {
     return (
       data !== null &&
       typeof data === 'object' &&
