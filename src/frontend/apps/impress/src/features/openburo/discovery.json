@@ -18,7 +18,7 @@
   { 
     "id":"twake-drive",
     "name":"Twake Drive",
-    "url":"http://drive.twp.localhost:8080",
+    "url":"http://drive.cozy-openburo.localhost:8084",
     "display": "popup",
     "version":"",
     "capabilities":[

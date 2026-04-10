@@ -191,8 +191,8 @@ export class OpenBuroPickClient {
 
   private isStatusEvent(
     data: unknown,
-    status: 'error' | 'cancel' | 'close',
-  ): data is { status: 'error' | 'cancel' | 'close'; message?: unknown } {
+    status: 'error' | 'cancel' | 'cancelled',
+  ): data is { status: 'error' | 'cancel' | 'cancelled'; message?: unknown } {
     return (
       data !== null &&
       typeof data === 'object' &&

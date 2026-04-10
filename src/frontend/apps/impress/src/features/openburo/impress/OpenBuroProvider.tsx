@@ -36,6 +36,7 @@ export const OpenBuroProvider = ({
   );
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const popupWindowRef = useRef<Window | null>(null);
+  const popupCloseWatcherRef = useRef<number | null>(null);
   const clientRef = useRef<OpenBuroPickClient | null>(null);
 
   if (clientRef.current === null) {
@@ -46,6 +47,11 @@ export const OpenBuroProvider = ({
   }
 
   const closeModals = ({ rejectPending }: { rejectPending: boolean }) => {
+    if (popupCloseWatcherRef.current !== null) {
+      window.clearInterval(popupCloseWatcherRef.current);
+      popupCloseWatcherRef.current = null;
+    }
+
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.close();
     }
@@ -92,6 +98,19 @@ export const OpenBuroProvider = ({
       }
 
       popupWindowRef.current = openedWindow;
+      popupCloseWatcherRef.current = window.setInterval(() => {
+        if (!popupWindowRef.current) {
+          if (popupCloseWatcherRef.current !== null) {
+            window.clearInterval(popupCloseWatcherRef.current);
+            popupCloseWatcherRef.current = null;
+          }
+          return;
+        }
+
+        if (popupWindowRef.current.closed) {
+          closeModals({ rejectPending: true });
+        }
+      }, 300);
       setIframeUrl(null);
       setIsServicePickerOpen(false);
       setIsModalOpen(false);
@@ -143,24 +162,38 @@ export const OpenBuroProvider = ({
   };
 
   const blobToBase64 = async (blob: Blob) => {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(new Error('Failed to read downloaded file'));
-      reader.readAsDataURL(blob);
-    });
+    const buffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunkSize = 0x8000;
 
-    const separatorIndex = dataUrl.indexOf(',');
-    if (separatorIndex === -1) {
-      throw new Error('Invalid downloaded file format');
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+      const chunk = bytes.subarray(index, index + chunkSize);
+      binary += String.fromCharCode(...chunk);
     }
 
-    return dataUrl.slice(separatorIndex + 1);
+    return btoa(binary);
+  };
+
+  const normalizePayloadToBase64 = (payload: string) => {
+    if (!payload.startsWith('data:')) {
+      return payload;
+    }
+
+    const separatorIndex = payload.indexOf(',');
+    if (separatorIndex === -1) {
+      throw new Error('Invalid payload data URL format');
+    }
+
+    return payload.slice(separatorIndex + 1);
   };
 
   const withDownloadedPayload = async (result: OpenFileResult) => {
     if (typeof result.payload === 'string' && result.payload.length > 0) {
-      return result;
+      return {
+        ...result,
+        payload: normalizePayloadToBase64(result.payload),
+      };
     }
 
     if (!result.downloadUrl) {
@@ -180,8 +213,8 @@ export const OpenBuroProvider = ({
     return {
       ...result,
       payload,
-      mimeType: result.mimeType || blob.type || 'application/octet-stream',
-      size: result.size || blob.size,
+      mimeType: blob.type || result.mimeType || 'application/octet-stream',
+      size: blob.size || result.size,
     };
   };
 

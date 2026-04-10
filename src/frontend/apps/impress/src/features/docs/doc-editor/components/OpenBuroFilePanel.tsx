@@ -12,7 +12,13 @@ import { useTranslation } from 'react-i18next';
 import { useOpenBuro } from '@/features/openburo/OpenBuroProvider';
 
 const OPEN_BURO_MIME_EXPANSION: Record<string, string[]> = {
-  'image/*': ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'],
+  'image/*': [
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/svg+xml',
+    'image/gif',
+  ],
   'video/*': [
     'video/mp4',
     'video/webm',
@@ -45,6 +51,21 @@ const normalizeOpenBuroMimeTypes = (mimeTypes: string[]) => {
   });
 
   return Array.from(new Set(expanded));
+};
+
+const base64ToBlob = (payload: string, mimeType: string) => {
+  const base64 = payload.startsWith('data:')
+    ? payload.slice(payload.indexOf(',') + 1)
+    : payload;
+  const normalized = base64.replace(/\s/g, '');
+  const binary = atob(normalized);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type: mimeType });
 };
 
 const OpenBuroImportTab = ({
@@ -95,23 +116,30 @@ const OpenBuroImportTab = ({
       }
 
       const selectedFile = response.results[0];
-      if (
-        !selectedFile ||
-        !selectedFile.name ||
-        typeof selectedFile.payload !== 'string'
-      ) {
+      if (!selectedFile || !selectedFile.name) {
         setImportFailed(true);
         return;
       }
 
-      const fileBase64Url = `data:${selectedFile.mimeType};base64,${selectedFile.payload}`;
-      const uploadedResponse = await fetch(fileBase64Url);
-      if (!uploadedResponse.ok) {
+      let blob: Blob | null = null;
+      if (typeof selectedFile.payload === 'string' && selectedFile.payload) {
+        blob = base64ToBlob(
+          selectedFile.payload,
+          selectedFile.mimeType || 'application/octet-stream',
+        );
+      } else if (selectedFile.downloadUrl) {
+        const downloadResponse = await fetch(selectedFile.downloadUrl);
+        if (!downloadResponse.ok) {
+          setImportFailed(true);
+          return;
+        }
+        blob = await downloadResponse.blob();
+      }
+
+      if (!blob) {
         setImportFailed(true);
         return;
       }
-
-      const blob = await uploadedResponse.blob();
       const mimeType =
         blob.type || selectedFile.mimeType || 'application/octet-stream';
       const file = new File([blob], selectedFile.name, { type: mimeType });

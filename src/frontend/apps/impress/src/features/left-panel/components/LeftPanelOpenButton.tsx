@@ -18,6 +18,21 @@ import { useSkeletonStore } from '@/features/skeletons';
 
 import { useLeftPanelStore } from '../stores';
 
+const base64ToBlob = (payload: string, mimeType: string) => {
+  const base64 = payload.startsWith('data:')
+    ? payload.slice(payload.indexOf(',') + 1)
+    : payload;
+  const normalized = base64.replace(/\s/g, '');
+  const binary = atob(normalized);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type: mimeType });
+};
+
 export const LeftPanelOpenButton = () => {
   const router = useRouter();
   const { t } = useTranslation();
@@ -93,9 +108,8 @@ export const LeftPanelOpenButton = () => {
       const res = await openBuro.openFile({
         allowedMimeType,
         multiple: false,
-        type: "payload",
+        type: 'payload',
       });
-
 
       if (res.status === 'error') {
         toast(res.message, VariantType.ERROR);
@@ -127,18 +141,29 @@ export const LeftPanelOpenButton = () => {
         return;
       }
 
-      const fileBase64Data = selectedFile.payload;
-      const fileBase64Url = `data:${selectedFile.mimeType};base64,${fileBase64Data}`;
-
-      // Fetch the file as a blob to get its MIME type and create a File object
-      const response = await fetch(fileBase64Url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch file data: ${response.status}`);
+      let blob: Blob | null = null;
+      if (typeof selectedFile.payload === 'string' && selectedFile.payload) {
+        blob = base64ToBlob(
+          selectedFile.payload,
+          selectedFile.mimeType || 'application/octet-stream',
+        );
+      } else if (selectedFile.downloadUrl) {
+        const downloadResponse = await fetch(selectedFile.downloadUrl);
+        if (!downloadResponse.ok) {
+          throw new Error(
+            `Failed to download OpenBuro file: ${downloadResponse.status}`,
+          );
+        }
+        blob = await downloadResponse.blob();
       }
 
-      const blob = await response.blob();
-      console.log('Fetched blob from base64 data:', blob);
-      const mimeType = blob.type || selectedFile.mimeType || 'application/octet-stream';
+      if (!blob) {
+        throw new Error('OpenBuro file has neither payload nor downloadUrl');
+      }
+
+      console.log('Fetched blob from OpenBuro data:', blob);
+      const mimeType =
+        blob.type || selectedFile.mimeType || 'application/octet-stream';
       const file = new File([blob], selectedFile.name, {
         type: mimeType,
       });
@@ -146,7 +171,9 @@ export const LeftPanelOpenButton = () => {
       const isTxtFile =
         mimeType === ContentTypes.Txt ||
         selectedFile.mimeType === ContentTypes.Txt ||
-        selectedFile.name.toLowerCase().endsWith('.txt');
+        selectedFile.name
+          .toLowerCase()
+          .endsWith('.txt');
 
       let fileToImport = file;
       let mimeTypeToImport = mimeType;
@@ -162,7 +189,10 @@ export const LeftPanelOpenButton = () => {
         mimeTypeToImport = ContentTypes.Markdown;
       }
 
-      const importedDoc = await importDocAsync([fileToImport, mimeTypeToImport]);
+      const importedDoc = await importDocAsync([
+        fileToImport,
+        mimeTypeToImport,
+      ]);
 
       setIsNavigating(true);
       await router.push(`/docs/${importedDoc.id}`);
