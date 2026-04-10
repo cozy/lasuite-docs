@@ -148,13 +148,18 @@ export const LeftPanelOpenButton = () => {
           selectedFile.mimeType || 'application/octet-stream',
         );
       } else if (selectedFile.downloadUrl) {
-        const downloadResponse = await fetch(selectedFile.downloadUrl);
+        const downloadResponse = await fetch(selectedFile.downloadUrl, {
+          credentials: 'include',
+        });
         if (!downloadResponse.ok) {
           throw new Error(
             `Failed to download OpenBuro file: ${downloadResponse.status}`,
           );
         }
         blob = await downloadResponse.blob();
+        if (blob.size === 0) {
+          throw new Error('Downloaded OpenBuro file is empty');
+        }
       }
 
       if (!blob) {
@@ -180,9 +185,12 @@ export const LeftPanelOpenButton = () => {
 
       if (isTxtFile) {
         const textContent = await blob.text();
-        const markdownFileName = selectedFile.name.toLowerCase().endsWith('.txt')
-          ? `${selectedFile.name.slice(0, -4)}.md`
-          : `${selectedFile.name}.md`;
+        const normalizedName = selectedFile.name.toLowerCase();
+        const markdownFileName = normalizedName.endsWith('.md')
+          ? selectedFile.name
+          : normalizedName.endsWith('.txt')
+            ? `${selectedFile.name.slice(0, -4)}.md`
+            : `${selectedFile.name}.md`;
         fileToImport = new File([textContent], markdownFileName, {
           type: ContentTypes.Markdown,
         });

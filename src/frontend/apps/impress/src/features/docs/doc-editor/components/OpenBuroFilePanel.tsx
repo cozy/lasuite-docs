@@ -128,12 +128,18 @@ const OpenBuroImportTab = ({
           selectedFile.mimeType || 'application/octet-stream',
         );
       } else if (selectedFile.downloadUrl) {
-        const downloadResponse = await fetch(selectedFile.downloadUrl);
+        const downloadResponse = await fetch(selectedFile.downloadUrl, {
+          credentials: 'include',
+        });
         if (!downloadResponse.ok) {
           setImportFailed(true);
           return;
         }
         blob = await downloadResponse.blob();
+        if (blob.size === 0) {
+          setImportFailed(true);
+          return;
+        }
       }
 
       if (!blob) {

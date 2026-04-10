@@ -129,14 +129,7 @@ export class OpenBuroPickClient {
     if (event.source !== iframeWindow) {
       return 'ignored';
     }
-
-    if (
-      this.currentServiceOrigin &&
-      event.origin !== this.currentServiceOrigin
-    ) {
-      return 'ignored';
-    }
-
+    
     console.debug('OpenBuroPickClient received message', event.data);
 
     if (!isRecord(event.data)) {
@@ -149,7 +142,8 @@ export class OpenBuroPickClient {
 
     if (
       this.isStatusEvent(event.data, 'error') ||
-      this.isStatusEvent(event.data, 'cancel')
+      this.isStatusEvent(event.data, 'cancel') ||
+      this.isStatusEvent(event.data, 'cancelled')
     ) {
       this.pendingPromise.reject(
         new Error(

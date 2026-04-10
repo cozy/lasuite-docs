@@ -33,14 +33,28 @@
   background: #ffffff;
   border-radius: 8px;
   padding: 12px 14px;
-  text-align: left;
-  font-size: 15px;
-  font-weight: 500;
-  font-family: 'Inter', sans-serif;
-  line-height: 1.4;
   cursor: pointer;
   transition: all 0.1s ease;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.openburo-modal-picker-item-name {
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.openburo-modal-picker-item-url {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+  opacity: 0.6;
+  margin: 0;
 }
 
 .openburo-modal-picker-item:hover {

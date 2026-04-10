@@ -22,7 +22,12 @@ export const OpenBuroServicePicker = ({
             className="openburo-modal-picker-item"
             onClick={() => onSelectService(service)}
           >
-            {service.name}
+            <p className="openburo-modal-picker-item-name">
+              {service.name}
+            </p>
+            <p className="openburo-modal-picker-item-url">
+              {service.url}
+            </p>
           </button>
         ))}
       </div>

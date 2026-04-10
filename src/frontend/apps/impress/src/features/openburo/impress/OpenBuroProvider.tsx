@@ -5,7 +5,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import discovery from '../discovery.json';
+import { fetchOpenBuroDiscovery } from '../discovery';
 import { OpenBuroPickClient } from '../spec/OpenBuroPickClient';
 import {
   OpenBuroService,
@@ -19,7 +19,6 @@ import { OpenBuroContextValue } from './types';
 const OpenBuroContext = React.createContext<OpenBuroContextValue | undefined>(
   undefined,
 );
-const OPEN_BURO_SERVICES = discovery as OpenBuroService[];
 
 export const OpenBuroProvider = ({
   children,
@@ -38,13 +37,6 @@ export const OpenBuroProvider = ({
   const popupWindowRef = useRef<Window | null>(null);
   const popupCloseWatcherRef = useRef<number | null>(null);
   const clientRef = useRef<OpenBuroPickClient | null>(null);
-
-  if (clientRef.current === null) {
-    clientRef.current = new OpenBuroPickClient({
-      services: OPEN_BURO_SERVICES,
-      getClientUrl: () => window.location.origin,
-    });
-  }
 
   const closeModals = ({ rejectPending }: { rejectPending: boolean }) => {
     if (popupCloseWatcherRef.current !== null) {
@@ -133,6 +125,29 @@ export const OpenBuroProvider = ({
   };
 
   useEffect(() => {
+    let isCancelled = false;
+
+    fetchOpenBuroDiscovery()
+      .then((services) => {
+        if (isCancelled) {
+          return;
+        }
+
+        clientRef.current = new OpenBuroPickClient({
+          services,
+          getClientUrl: () => window.location.origin,
+        });
+      })
+      .catch((error) => {
+        console.error('Failed to initialize OpenBuro discovery', error);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const result = clientRef.current?.handleMessage(
         event,
@@ -188,19 +203,55 @@ export const OpenBuroProvider = ({
     return payload.slice(separatorIndex + 1);
   };
 
+  const isCancelledOpenFileResponse = (
+    response: unknown,
+  ): response is { status: 'cancel' | 'cancelled' } => {
+    return (
+      response !== null &&
+      typeof response === 'object' &&
+      'status' in response &&
+      (((response as { status?: unknown }).status === 'cancel') ||
+        (response as { status?: unknown }).status === 'cancelled')
+    );
+  };
+
+  const hasFileExtension = (name: string) => /\.[^./\\]+$/.test(name);
+
+  const normalizeImportedFileName = (result: OpenFileResult) => {
+    if (hasFileExtension(result.name)) {
+      return result.name;
+    }
+
+    if (result.mimeType.startsWith('text/')) {
+      return `${result.name}.md`;
+    }
+
+    return result.name;
+  };
+
   const withDownloadedPayload = async (result: OpenFileResult) => {
     if (typeof result.payload === 'string' && result.payload.length > 0) {
-      return {
+      const normalizedResult = {
         ...result,
         payload: normalizePayloadToBase64(result.payload),
+      };
+
+      return {
+        ...normalizedResult,
+        name: normalizeImportedFileName(normalizedResult),
       };
     }
 
     if (!result.downloadUrl) {
-      return result;
+      return {
+        ...result,
+        name: normalizeImportedFileName(result),
+      };
     }
 
-    const downloadedResponse = await fetch(result.downloadUrl);
+    const downloadedResponse = await fetch(result.downloadUrl, {
+      credentials: 'include',
+    });
     if (!downloadedResponse.ok) {
       throw new Error(
         `Failed to download OpenBuro file from URL: ${downloadedResponse.status}`,
@@ -208,13 +259,21 @@ export const OpenBuroProvider = ({
     }
 
     const blob = await downloadedResponse.blob();
+    if (blob.size === 0) {
+      throw new Error('Downloaded OpenBuro file is empty');
+    }
     const payload = await blobToBase64(blob);
 
-    return {
+    const normalizedResult = {
       ...result,
       payload,
       mimeType: blob.type || result.mimeType || 'application/octet-stream',
       size: blob.size || result.size,
+    };
+
+    return {
+      ...normalizedResult,
+      name: normalizeImportedFileName(normalizedResult),
     };
   };
 
@@ -234,6 +293,13 @@ export const OpenBuroProvider = ({
       }
 
       const response = await openFilePromise;
+
+      if (isCancelledOpenFileResponse(response)) {
+        closeModals({ rejectPending: false });
+        throw new Error(
+          `OpenBuro picker returned with status: ${response.status}`,
+        );
+      }
 
       if (response.status === 'error') {
         showImportErrorToast();

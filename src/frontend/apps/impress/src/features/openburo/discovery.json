@@ -1,23 +1,23 @@
 [
-  { 
-    "id":"webdav-picker",
-    "name":"WebDAV File Picker",
-    "url":"http://10.4.0.32:5000",
-    "display": "modal",
-    "version":"",
-    "capabilities":[
+  {
+    "id": "twake-drive-hosted",
+    "name": "Twake Drive File Picker",
+    "url": "https://openburo1-drive.stg.lin-saas.com",
+    "display": "popup",
+    "version": "1.97.0",
+    "capabilities": [
       {
-        "action":"PICK",
-        "properties":{
-            "mimeTypes":["*/*"]
+        "action": "PICK",
+        "properties": {
+          "mimeTypes": ["*/*"]
         },
-        "path":"http://10.4.0.32:5000/browse"
+	      "path":"https://openburo1-drive.stg.lin-saas.com/capabilities/PICK/"
       }
     ]
   },
   { 
-    "id":"twake-drive",
-    "name":"Twake Drive",
+    "id":"twake-drive-pop-up",
+    "name":"Local Twake Drive (as pop-up)",
     "url":"http://drive.cozy-openburo.localhost:8084",
     "display": "popup",
     "version":"",
@@ -30,23 +30,5 @@
         "path":"http://drive.cozy-openburo.localhost:8084/capabilities/PICK"
       }
     ]
-  },
-  {
-    "capabilities": [
-      {
-        "action": "PICK",
-        "path": "http://837a-46-255-204-128.ngrok-free.app/embed/file-picker",
-        "properties": {
-          "mimeTypes": [
-            "*/*"
-          ]
-        }
-      }
-    ],
-    "id": "fichiers-file-picker",
-    "name": "Fichiers File Picker",
-    "url": "https://837a-46-255-204-128.ngrok-free.app",
-    "version": "1",
-    "display": "modal"
   }
 ]
