@@ -1,4 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {
+  VariantType,
+  useToastProvider,
+} from '@gouvfr-lasuite/cunningham-react';
+import { useTranslation } from 'react-i18next';
 
 import discovery from '../discovery.json';
 import { OpenBuroPickClient } from '../spec/OpenBuroPickClient';
@@ -17,6 +22,8 @@ export const OpenBuroProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { toast } = useToastProvider();
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [isServicePickerOpen, setIsServicePickerOpen] = useState(false);
@@ -72,9 +79,18 @@ export const OpenBuroProvider = ({
     };
   }, []);
 
-  const openFile = (params?: OpenFileParams) => {
-    return (
-      clientRef.current?.openFile(params, {
+  const showImportErrorToast = () => {
+    toast(
+      t('The document "{{documentName}}" import has failed', {
+        documentName: '',
+      }),
+      VariantType.ERROR,
+    );
+  };
+
+  const openFile = async (params?: OpenFileParams) => {
+    try {
+      const openFilePromise = clientRef.current?.openFile(params, {
         onRequireServiceSelection: (services) => {
           setAvailableServices(services);
           setIsServicePickerOpen(true);
@@ -84,8 +100,22 @@ export const OpenBuroProvider = ({
           setIsServicePickerOpen(false);
           setIsModalOpen(true);
         },
-      }) ?? Promise.reject(new Error('OpenBuro client not initialized'))
-    );
+      });
+      if (!openFilePromise) {
+        throw new Error('OpenBuro client not initialized');
+      }
+
+      const response = await openFilePromise;
+
+      if (response.status === 'error') {
+        showImportErrorToast();
+      }
+
+      return response;
+    } catch (error) {
+      showImportErrorToast();
+      throw error;
+    }
   };
 
   return (
