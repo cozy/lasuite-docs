@@ -42,8 +42,3 @@ export type OpenBuroService = {
   version?: string;
   capabilities: OpenBuroCapability[];
 };
-
-export type OpenBuroContextValue = {
-  openFile: (params?: OpenFileParams) => Promise<OpenFileResponse>;
-  isModalOpen: boolean;
-};

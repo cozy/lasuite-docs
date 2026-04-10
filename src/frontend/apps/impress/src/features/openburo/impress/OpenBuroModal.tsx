@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { OpenBuroService } from '../spec/types';
+
 import { OpenBuroServicePicker } from './OpenBuroServicePicker';
-import { OpenBuroService } from './types';
 
 type OpenBuroModalProps = {
   isModalOpen: boolean;
