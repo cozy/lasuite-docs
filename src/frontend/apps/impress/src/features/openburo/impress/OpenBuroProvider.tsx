@@ -88,6 +88,17 @@ export const OpenBuroProvider = ({
     );
   };
 
+  const isOpenBuroCancellation = (error: unknown) => {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    return (
+      error.message.includes('OpenBuro picker closed before completion') ||
+      error.message.includes('status: cancel')
+    );
+  };
+
   const openFile = async (params?: OpenFileParams) => {
     try {
       const openFilePromise = clientRef.current?.openFile(params, {
@@ -113,7 +124,9 @@ export const OpenBuroProvider = ({
 
       return response;
     } catch (error) {
-      showImportErrorToast();
+      if (!isOpenBuroCancellation(error)) {
+        showImportErrorToast();
+      }
       throw error;
     }
   };
