@@ -86,7 +86,7 @@ const OpenBuroImportTab = ({
       const response = await openBuro.openFile({
         allowedMimeType: acceptedMimeTypes,
         multiple: false,
-        type: 'content',
+        type: 'payload',
       });
 
       if (response.status === 'error') {
