@@ -40,7 +40,7 @@ export const LeftPanelOpenButton = () => {
     const extensions =
       configuredExtensions && configuredExtensions.length > 0
         ? configuredExtensions
-        : ['.docx', '.md', '.markdown'];
+        : ['.docx', '.md', '.markdown', '.txt'];
     const mimeTypes = new Set<string>();
 
     if (extensions.some((extension) => extension === '.docx')) {
@@ -55,6 +55,8 @@ export const LeftPanelOpenButton = () => {
       mimeTypes.add(ContentTypes.Markdown);
     }
 
+    mimeTypes.add(ContentTypes.Txt);
+
     return Array.from(mimeTypes);
   }, [config?.CONVERSION_FILE_EXTENSIONS_ALLOWED]);
 
@@ -63,9 +65,13 @@ export const LeftPanelOpenButton = () => {
       config?.CONVERSION_FILE_EXTENSIONS_ALLOWED?.map((extension) =>
         extension.toLowerCase(),
       );
-    return configuredExtensions && configuredExtensions.length > 0
-      ? configuredExtensions
-      : ['.docx', '.md', '.markdown'];
+    const baseExtensions =
+      configuredExtensions && configuredExtensions.length > 0
+        ? configuredExtensions
+        : ['.docx', '.md', '.markdown', '.txt'];
+    return baseExtensions.includes('.txt')
+      ? baseExtensions
+      : [...baseExtensions, '.txt'];
   }, [config?.CONVERSION_FILE_EXTENSIONS_ALLOWED]);
 
   const isResultCompatible = (result: { name: string; mimeType: string }) => {
@@ -75,7 +81,8 @@ export const LeftPanelOpenButton = () => {
     );
     const byMime =
       result.mimeType === ContentTypes.Docx ||
-      result.mimeType === ContentTypes.Markdown;
+      result.mimeType === ContentTypes.Markdown ||
+      result.mimeType === ContentTypes.Txt;
 
     return byExtension || byMime;
   };
@@ -110,7 +117,7 @@ export const LeftPanelOpenButton = () => {
       if (!isResultCompatible(selectedFile)) {
         toast(
           t(
-            'The document "{{documentName}}" import has failed (only .docx and .md files are allowed)',
+            'The document "{{documentName}}" import has failed (only .docx, .md and .txt files are allowed)',
             {
               documentName: selectedFile.name,
             },
@@ -136,7 +143,26 @@ export const LeftPanelOpenButton = () => {
         type: mimeType,
       });
 
-      const importedDoc = await importDocAsync([file, mimeType]);
+      const isTxtFile =
+        mimeType === ContentTypes.Txt ||
+        selectedFile.mimeType === ContentTypes.Txt ||
+        selectedFile.name.toLowerCase().endsWith('.txt');
+
+      let fileToImport = file;
+      let mimeTypeToImport = mimeType;
+
+      if (isTxtFile) {
+        const textContent = await blob.text();
+        const markdownFileName = selectedFile.name.toLowerCase().endsWith('.txt')
+          ? `${selectedFile.name.slice(0, -4)}.md`
+          : `${selectedFile.name}.md`;
+        fileToImport = new File([textContent], markdownFileName, {
+          type: ContentTypes.Markdown,
+        });
+        mimeTypeToImport = ContentTypes.Markdown;
+      }
+
+      const importedDoc = await importDocAsync([fileToImport, mimeTypeToImport]);
 
       setIsNavigating(true);
       await router.push(`/docs/${importedDoc.id}`);

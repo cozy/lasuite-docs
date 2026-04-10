@@ -20,6 +20,7 @@ import { Doc, DocsResponse, KEY_LIST_DOC } from '@/docs/doc-management';
 export enum ContentTypes {
   Docx = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   Markdown = 'text/markdown',
+  Txt = 'text/plain',
   OctetStream = 'application/octet-stream',
 }
 
