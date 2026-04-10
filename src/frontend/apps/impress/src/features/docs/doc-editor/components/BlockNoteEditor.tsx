@@ -11,7 +11,7 @@ import '@blocknote/core/fonts/inter.css';
 import * as localesBN from '@blocknote/core/locales';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import { useCreateBlockNote } from '@blocknote/react';
+import { FilePanelController, useCreateBlockNote } from '@blocknote/react';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +42,7 @@ import { randomColor } from '../utils';
 import BlockNoteAI from './AI';
 import { BlockNoteSuggestionMenu } from './BlockNoteSuggestionMenu';
 import { BlockNoteToolbar } from './BlockNoteToolBar/BlockNoteToolbar';
+import { OpenBuroFilePanel } from './OpenBuroFilePanel';
 import { cssComments, useComments } from './comments/';
 import {
   AccessibleImageBlock,
@@ -286,6 +287,7 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
         editor={editor}
         formattingToolbar={false}
         slashMenu={false}
+        filePanel={false}
         theme="light"
         comments={showComments}
         aria-label={t('Document editor')}
@@ -293,6 +295,7 @@ export const BlockNoteEditor = ({ doc, provider }: BlockNoteEditorProps) => {
         {aiBlockNoteAllowed && AIMenuController && AIMenu && (
           <AIMenuController aiMenu={AIMenu} />
         )}
+        <FilePanelController filePanel={OpenBuroFilePanel} />
         <BlockNoteSuggestionMenu aiAllowed={aiBlockNoteAllowed} />
         <BlockNoteToolbar aiAllowed={aiBlockNoteAllowed} />
       </BlockNoteView>
