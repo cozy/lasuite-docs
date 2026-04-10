@@ -107,7 +107,25 @@ export const OpenBuroProvider = ({
         return;
       }
 
+      if(event.data.status === 'error' || event.data.status === 'cancel') {
+        pendingPromiseRef.current.reject(
+          new Error(
+            `OpenBuro picker returned with status: ${event.data.status}${
+              typeof event.data.message === 'string' ? `, message: ${event.data.message}` : ''
+            }`,
+          ),
+        );
+        pendingPromiseRef.current = null;
+        closeModals({ rejectPending: false });
+        return;
+      }
+
       if (!isValidOpenFileResponse(event.data, currentRequestIdRef.current)) {
+        pendingPromiseRef.current.reject(
+          new Error('Invalid response from OpenBuro picker'),
+        );
+        pendingPromiseRef.current = null;
+        closeModals({ rejectPending: false });
         return;
       }
 
