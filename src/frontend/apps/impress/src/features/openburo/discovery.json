@@ -11,7 +11,7 @@
         "properties":{
             "mimeTypes":["*/*"]
         },
-        "path":"browse"
+        "path":"http://10.4.0.32:5000/browse"
       }
     ]
   },
@@ -27,7 +27,7 @@
         "properties":{
             "mimeTypes":["*/*"]
         },
-        "path":"capabilities/PICK"
+        "path":"http://drive.cozy-openburo.localhost:8084/capabilities/PICK"
       }
     ]
   },
@@ -35,7 +35,7 @@
     "capabilities": [
       {
         "action": "PICK",
-        "path": "embed/file-picker",
+        "path": "http://837a-46-255-204-128.ngrok-free.app/embed/file-picker",
         "properties": {
           "mimeTypes": [
             "*/*"

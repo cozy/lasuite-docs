@@ -58,7 +58,7 @@ export const buildCapabilityIframeUrl = ({
   requestId: string;
   clientUrl: string;
 }) => {
-  const url = new URL(`${service.url}/${capability.path}`, clientUrl);
+  const url = new URL(`${capability.path}`);
 
   url.searchParams.set('clientUrl', clientUrl);
   url.searchParams.set('id', requestId);
