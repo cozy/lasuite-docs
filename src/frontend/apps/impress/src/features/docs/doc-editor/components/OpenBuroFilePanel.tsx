@@ -183,16 +183,6 @@ export const OpenBuroFilePanel = (props: FilePanelProps) => {
 
   const tabs = useMemo(() => {
     return [
-      ...(editor.uploadFile !== undefined
-        ? [
-            {
-              name: dict.file_panel.upload.title,
-              tabPanel: (
-                <UploadTab blockId={props.blockId} setLoading={setLoading} />
-              ),
-            },
-          ]
-        : []),
       ...(hasOpenBuroImportTab
         ? [
             {
@@ -202,6 +192,16 @@ export const OpenBuroFilePanel = (props: FilePanelProps) => {
                   blockId={props.blockId}
                   setLoading={setLoading}
                 />
+              ),
+            },
+          ]
+        : []),
+      ...(editor.uploadFile !== undefined
+        ? [
+            {
+              name: dict.file_panel.upload.title,
+              tabPanel: (
+                <UploadTab blockId={props.blockId} setLoading={setLoading} />
               ),
             },
           ]
